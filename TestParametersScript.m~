@@ -73,7 +73,7 @@
     i = 1;
     for blockSize_i = lowerbound: offset : upperbound
         
-        fprintf('blockSize_i = %f\n', blockSize_i);
+        fprintf('embedPos_i = %f\n', blockSize_i);
         
         n = floor(512/blockSize_i) * floor(512/blockSize_i);
         
@@ -125,7 +125,7 @@
     
     
     %Modified
-    parameterFolder = 'Nai/BlockSize_Test/';
+    parameterFolder = 'Nai/Alpha_Test/';
     %
 
     if exist(parameterFolder, 'dir') ~= 7
@@ -133,24 +133,24 @@
     end
     
     %Modified
-    subname = '_4_to_512_by_1';
+    subname = '_1_to_100_by_1';
     %
     
     fileID = fopen([parameterFolder 'data' subname '.txt'], 'w');
     %Modified
-    fprintf(fileID, 'Testing Block Size from %f to %f by %f:\n', lowerbound, upperbound, offset);
+    fprintf(fileID, 'Testing Alpha from %f to %f by %f:\n', lowerbound, upperbound, offset);
     %
     
     fprintf(fileID, 'Parameters:\n');
     fprintf(fileID, '\tWatermark length = %d\n', n);
     fprintf(fileID, '\tPattern length = %d\n', m);
-    %fprintf(fileID, '\tBlock size = %d\n', blockSize);
-    fprintf(fileID, '\tAlpha = %.2f\n', alpha);
+    fprintf(fileID, '\tBlock size = %d\n', blockSize);
+    %fprintf(fileID, '\tAlpha = %.2f\n', alpha);
     fprintf(fileID, '\tLambda = %.2f\n', lambda);
     
     %Modified
-    fprintf(fileID, 'blockSize\n\t');
-    fprintf(fileID, '%10f ', array_blockSize);
+    fprintf(fileID, 'alpha\n\t');
+    fprintf(fileID, '%10f ', array_alpha);
     %
     fprintf(fileID, '\ncapacity\n\t');
     fprintf(fileID, '%10f ', array_capacity);
@@ -160,7 +160,7 @@
     fprintf(fileID, '%10f ', array_ber);
     
     %Modified
-    save([parameterFolder 'blockSize' subname '.mat'], 'array_blockSize');
+    save([parameterFolder 'alpha' subname '.mat'], 'array_alpha');
     %
     save([parameterFolder 'capacity' subname '.mat'], 'array_capacity');
     save([parameterFolder 'psnr' subname '.mat'], 'array_psnr');

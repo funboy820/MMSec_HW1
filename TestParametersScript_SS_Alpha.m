@@ -36,16 +36,16 @@
 	
 	% Prepoorcessing - generate watermark (n*1 +-1 vector)
     % n: watermark length, b: watermark
-    n = 128*128;
-    total_b = sign(randn(n, 1));
+    n = 4096;
+    b = sign(randn(n, 1));
 	
 
 	% Watermark embedding settings - set alpha, lambda, blockSize, pattern
     % m: pattern length & x length
-    alpha = 1;
-    lambda = 0.9999;
+    alpha = 0.5;
+    lambda = 1.00;
     blockSize = 8;
-    m = 16;
+    m = 15;
     u = sign(randn(m, 1));
     
     % Print parameters
@@ -56,31 +56,33 @@
     fprintf('\tAlpha = %.2f\n', alpha);
     fprintf('\tLambda = %.2f\n', lambda);
 	
-    
-    lowerbound = 4;
-    upperbound = 512;
-    offset = 1;
+    %Modified
+    lowerbound = 0.1;
+    upperbound = 100;
+    offset = 0.1;
+    %
     
     num_test = (upperbound - lowerbound) / offset + 1;
-    array_blockSize = zeros(1, num_test);
+    %Modified
+    array_alpha = zeros(1, num_test);
+    %
     array_capacity = zeros(1, num_test);
     array_psnr = zeros(1, num_test);
     array_ber = zeros(1, num_test);
     
-    
-    fprintf('Testing blockSize from %f to %f by %f:\n', lowerbound, upperbound, offset);
+    %Modified
+    fprintf('Testing alpha from %f to %f by %f:\n', lowerbound, upperbound, offset);
+    %
     
     i = 1;
-    for blockSize_i = lowerbound: offset : upperbound
+    %Modified
+    for alpha_i = lowerbound: offset : upperbound
         
-        fprintf('blockSize_i = %f\n', blockSize_i);
-        
-        n = floor(512/blockSize_i) * floor(512/blockSize_i);
-        
-        b = total_b(1: n);
+        fprintf('alpha_i = %f\n', alpha_i);
 
         % Improved Spread Spectrum Embed
-        watermarkedImg = ImprovedSpreadSpectrumEmbed(orgImg, b, u, alpha, lambda, blockSize_i);
+        watermarkedImg = SpreadSpectrumEmbed(orgImg, b, u, alpha_i, blockSize);
+        %
 
         %subplot(1, 2, 2);
         %imshow(watermarkedImg, [0 255]);
@@ -93,7 +95,9 @@
         
     %% ISSextract process
         % Watermark extraction settings - set pattern, blkSize, wmSize
-        watermark0 = ImprovedSpreadSpectrumExtract(watermarkedImg, u, blockSize_i, n);
+        %Modified
+        watermark0 = SpreadSpectrumExtract(watermarkedImg, u, blockSize, n);
+        %
 
 
     %% Measurement
@@ -114,7 +118,9 @@
         BER = numDiff / n;
         fprintf('\tRobustness : BER = %.2f\n', BER);
         
-        array_blockSize(i) = blockSize_i;
+        %Modified
+        array_alpha(i) = alpha_i;
+        %
         array_capacity(i) = capacity;
         array_psnr(i) = PSNR;
         array_ber(i) = BER;
@@ -123,9 +129,8 @@
         i = i + 1;
     end
     
-    
     %Modified
-    parameterFolder = 'Nai/BlockSize_Test/';
+    parameterFolder = 'Alpha_Test/SS/';
     %
 
     if exist(parameterFolder, 'dir') ~= 7
@@ -133,24 +138,24 @@
     end
     
     %Modified
-    subname = '_4_to_512_by_1';
+    subname = '_0-1_to_100_by_0-1';
     %
     
     fileID = fopen([parameterFolder 'data' subname '.txt'], 'w');
     %Modified
-    fprintf(fileID, 'Testing Block Size from %f to %f by %f:\n', lowerbound, upperbound, offset);
+    fprintf(fileID, 'Testing Alpha from %f to %f by %f:\n', lowerbound, upperbound, offset);
     %
     
     fprintf(fileID, 'Parameters:\n');
     fprintf(fileID, '\tWatermark length = %d\n', n);
     fprintf(fileID, '\tPattern length = %d\n', m);
-    %fprintf(fileID, '\tBlock size = %d\n', blockSize);
+    fprintf(fileID, '\tBlock size = %d\n', blockSize);
     fprintf(fileID, '\tAlpha = %.2f\n', alpha);
     fprintf(fileID, '\tLambda = %.2f\n', lambda);
     
     %Modified
-    fprintf(fileID, 'blockSize\n\t');
-    fprintf(fileID, '%10f ', array_blockSize);
+    fprintf(fileID, 'alpha\n\t');
+    fprintf(fileID, '%10f ', array_alpha);
     %
     fprintf(fileID, '\ncapacity\n\t');
     fprintf(fileID, '%10f ', array_capacity);
@@ -160,7 +165,7 @@
     fprintf(fileID, '%10f ', array_ber);
     
     %Modified
-    save([parameterFolder 'blockSize' subname '.mat'], 'array_blockSize');
+    save([parameterFolder 'alpha' subname '.mat'], 'array_alpha');
     %
     save([parameterFolder 'capacity' subname '.mat'], 'array_capacity');
     save([parameterFolder 'psnr' subname '.mat'], 'array_psnr');
