@@ -57,9 +57,9 @@
     fprintf('\tLambda = %.2f\n', lambda);
 	
     
-    lowerbound = 1;
-    upperbound = 100;
-    offset = 1;
+    lowerbound = 0.1;
+    upperbound = 1;
+    offset = 0.1;
     
     num_test = (upperbound - lowerbound) / offset + 1;
     array_alpha = zeros(1, num_test);
@@ -128,7 +128,7 @@
     end
     
     %Modified
-    subname = '_1_to_100_by_1';
+    subname = '_0-1_to_1_by_0-1';
     %
     
     fileID = fopen([parameterFolder 'data' subname '.txt'], 'w');

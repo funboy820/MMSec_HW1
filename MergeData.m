@@ -1,19 +1,19 @@
 %%Merge Data
 
 %Modified
-folder = 'Nai/BlockSize_Test/';
-subname = '_4_to_512_by_1.mat';
+folder = 'Alpha_Test/';
+subname = '_0-1_to_100_by_0-1.mat';
 %
 
 %Modified
-load([folder 'blockSize' subname]);
+load([folder 'alpha' subname]);
 %
 load([folder 'capacity' subname]);
 load([folder 'psnr' subname]);
 load([folder 'ber' subname]);
 
 %Modified
-len = length(array_blockSize);
+len = length(array_alpha);
 
 
 % data_ss_alpha = zeros(4,len);
@@ -28,19 +28,19 @@ len = length(array_blockSize);
 %     data_ss_alpha(4, i) = array_ber(i);
 % end
 
-plot(array_blockSize, array_ber);
-%axis([1, 10, 0, 1]);
-xlabel('Block Size')
+plot(array_alpha, array_ber);
+axis([0.1, 1, 0, 1]);
+xlabel('Alpha')
 ylabel('BER');
 
 figure
-plot(array_blockSize, array_psnr);
+plot(array_alpha, array_psnr);
 %axis([1, 50, -Inf, Inf]);
-xlabel('Block Size');
+xlabel('Alpha');
 ylabel('PSNR');
 
 
 figure
-plot(array_blockSize, array_capacity);
-xlabel('Block Size');
+plot(array_alpha, array_capacity);
+xlabel('Alpha');
 ylabel('Capacity');
