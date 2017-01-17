@@ -32,12 +32,18 @@ function ExecuteScript(InputImage_Name, wmLen, patternLen, blockSize, alpha, lam
     subplot(1, 2, 1);
     imshow(orgImg);
     title('Original Image');
-
+    height = size(orgImg, 1);
+    width = size(orgImg, 2);
     
 	
 	% Prepoorcessing - generate watermark (n*1 +-1 vector)
     % n: watermark length, b: watermark
-    n = wmLen;
+    maxWatermarkLength = floor(height/blockSize) * floor(width/blockSize);
+    if wmLen > maxWatermarkLength
+        n = maxWatermarkLength;
+    else
+        n = wmLen;
+    end
     b = sign(randn(n, 1));
 	
 
