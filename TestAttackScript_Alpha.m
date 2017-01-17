@@ -257,10 +257,6 @@
         %Modified
         array_alpha(i) = alpha_i;
         %
-        
-        
-        
-        
         array_capacity(i) = capacity;
         array_psnr(i) = PSNR;
         

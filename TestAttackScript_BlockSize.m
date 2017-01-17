@@ -36,8 +36,8 @@
 	
 	% Prepoorcessing - generate watermark (n*1 +-1 vector)
     % n: watermark length, b: watermark
-    n = 4096;
-    b = sign(randn(n, 1));
+    n = 128*128;
+    total_b = sign(randn(n, 1));
 	
 
 	% Watermark embedding settings - set alpha, lambda, blockSize, pattern
@@ -46,45 +46,49 @@
     lambda = 1.00;
     blockSize = 8;
     %Modified
-    m = 15;
-    u = sign(randn(m, 1));
+    m = 512*512/2;
+    total_u = sign(randn(m, 1));
     %
     
     % Print parameters
     fprintf('Parameters:\n');
-    fprintf('\tWatermark length = %d\n', n);
-    fprintf('\tPattern length = %d\n', m);
-    fprintf('\tBlock size = %d\n', blockSize);
+    %fprintf('\tWatermark length = %d\n', n);
+    %fprintf('\tPattern length = %d\n', m);
+    %fprintf('\tBlock size = %d\n', blockSize);
     fprintf('\tAlpha = %.2f\n', alpha);
     fprintf('\tLambda = %.2f\n', lambda);
 	
     %Modified
-    lowerbound = 1;
-    upperbound = 100;
+    lowerbound = 4;
+    upperbound = 512;
     offset = 1;
     %
     
     num_test = (upperbound - lowerbound) / offset + 1;
     %Modified
-    array_alpha = zeros(1, num_test);
+    array_blockSize = zeros(1, num_test);
     %
     array_capacity = zeros(1, num_test);
     array_psnr = zeros(1, num_test);
     array_ber = zeros(10, num_test);
     
     %Modified
-    fprintf('Testing Attack - Alpha from %f to %f by %f:\n', lowerbound, upperbound, offset);
+    fprintf('Testing Attack - Block Size from %f to %f by %f:\n', lowerbound, upperbound, offset);
     %
     
     i = 1;
     %Modified
-    for alpha_i = lowerbound: offset : upperbound
+    for blockSize_i = lowerbound: offset : upperbound
         
-        fprintf('alpha_i = %f\n', alpha_i);
+        fprintf('blockSize_i = %f\n', blockSize_i);
+        
+        u = total_u(1:floor(blockSize_i^2/2));
+        n = floor(512/blockSize_i) * floor(512/blockSize_i);
+        b = total_b(1: n);
         
         % Improved Spread Spectrum Embed
         % InputImage, watermark, pattern, alpha, lambda, blkSize
-        watermarkedImg = ImprovedSpreadSpectrumEmbed(orgImg, b, u, alpha_i, lambda, blockSize);
+        watermarkedImg = ImprovedSpreadSpectrumEmbed(orgImg, b, u, alpha, lambda, blockSize_i);
         %
 
         %subplot(1, 2, 2);
@@ -211,16 +215,16 @@
 	
 	
 	% Watermark extraction settings - set pattern, blkSize, wmSize
-    watermark0 = ImprovedSpreadSpectrumExtract(watermarkedImg, u, blockSize, n);
-	watermark1 = ImprovedSpreadSpectrumExtract(attackedImg1, u, blockSize, n);
-    watermark2 = ImprovedSpreadSpectrumExtract(attackedImg2, u, blockSize, n);
-    watermark3 = ImprovedSpreadSpectrumExtract(attackedImg3, u, blockSize, n);
-    watermark4 = ImprovedSpreadSpectrumExtract(attackedImg4, u, blockSize, n);
-    watermark5 = ImprovedSpreadSpectrumExtract(attackedImg5, u, blockSize, n);
-    watermark6 = ImprovedSpreadSpectrumExtract(attackedImg6, u, blockSize, n);
-    watermark7 = ImprovedSpreadSpectrumExtract(attackedImg7, u, blockSize, n);
-    watermark8 = ImprovedSpreadSpectrumExtract(attackedImg8, u, blockSize, n);
-    watermark9 = ImprovedSpreadSpectrumExtract(attackedImg9, u, blockSize, n);
+    watermark0 = ImprovedSpreadSpectrumExtract(watermarkedImg, u, blockSize_i, n);
+	watermark1 = ImprovedSpreadSpectrumExtract(attackedImg1, u, blockSize_i, n);
+    watermark2 = ImprovedSpreadSpectrumExtract(attackedImg2, u, blockSize_i, n);
+    watermark3 = ImprovedSpreadSpectrumExtract(attackedImg3, u, blockSize_i, n);
+    watermark4 = ImprovedSpreadSpectrumExtract(attackedImg4, u, blockSize_i, n);
+    watermark5 = ImprovedSpreadSpectrumExtract(attackedImg5, u, blockSize_i, n);
+    watermark6 = ImprovedSpreadSpectrumExtract(attackedImg6, u, blockSize_i, n);
+    watermark7 = ImprovedSpreadSpectrumExtract(attackedImg7, u, blockSize_i, n);
+    watermark8 = ImprovedSpreadSpectrumExtract(attackedImg8, u, blockSize_i, n);
+    watermark9 = ImprovedSpreadSpectrumExtract(attackedImg9, u, blockSize_i, n);
         
         
 
@@ -255,12 +259,8 @@
         fprintf('\t9. %-30s: %f\n', Attacked_Type9, (sum((b == watermark9) == 0)) / n);
         
         %Modified
-        array_alpha(i) = alpha_i;
+        array_blockSize(i) = blockSize_i;
         %
-        
-        
-        
-        
         array_capacity(i) = capacity;
         array_psnr(i) = PSNR;
         
@@ -280,7 +280,7 @@
     end
     
     %Modified
-    parameterFolder = 'Attack/Alpha/';
+    parameterFolder = 'Attack/BlockSize/';
     %
 
     if exist(parameterFolder, 'dir') ~= 7
@@ -288,24 +288,24 @@
     end
     
     %Modified
-    subname = '_1_to_100_by_1';
+    subname = '_4_to_512_by_1_alpha_05';
     %
     
     fileID = fopen([parameterFolder 'data' subname '.txt'], 'w');
     %Modified
-    fprintf(fileID, 'Testing Attack - Alpha from %f to %f by %f:\n', lowerbound, upperbound, offset);
+    fprintf(fileID, 'Testing Attack - Block Size from %f to %f by %f:\n', lowerbound, upperbound, offset);
     %
     
     fprintf(fileID, 'Parameters:\n');
-    fprintf(fileID, '\tWatermark length = %d\n', n);
-    fprintf(fileID, '\tPattern length = %d\n', m);
-    fprintf(fileID, '\tBlock size = %d\n', blockSize);
+    %fprintf(fileID, '\tWatermark length = %d\n', n);
+    %fprintf(fileID, '\tPattern length = %d\n', m);
+    %fprintf(fileID, '\tBlock size = %d\n', blockSize);
     fprintf(fileID, '\tAlpha = %.2f\n', alpha);
     fprintf(fileID, '\tLambda = %.2f\n', lambda);
     
     %Modified
-    fprintf(fileID, 'alpha\n\t');
-    fprintf(fileID, '%10f ', array_alpha);
+    fprintf(fileID, 'blockSize\n\t');
+    fprintf(fileID, '%10f ', array_blockSize);
     %
     fprintf(fileID, '\ncapacity\n\t');
     fprintf(fileID, '%10f ', array_capacity);
@@ -315,7 +315,7 @@
     fprintf(fileID, '%10f ', array_ber);
     
     %Modified
-    save([parameterFolder 'alpha' subname '.mat'], 'array_alpha');
+    save([parameterFolder 'blockSize' subname '.mat'], 'array_blockSize');
     %
     save([parameterFolder 'capacity' subname '.mat'], 'array_capacity');
     save([parameterFolder 'psnr' subname '.mat'], 'array_psnr');
