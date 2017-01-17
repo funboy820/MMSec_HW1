@@ -17,7 +17,11 @@ function WMImage = ImprovedSpreadSpectrumEmbed(InputImage, watermark, pattern, a
     zzOrder = reshape(zzOrder, 1, []);
     [~, zzOrder]= sort(zzOrder,'ascend');
     
-    zzStart = (blkSize^2) / 2 - floor(m/2);
+    zzStart = floor((blkSize^2) / 2 - floor(m/2));
+    
+    if zzStart <= 0
+        zzStart = 1;
+    end
     
     indexSequence = zzOrder(zzStart : (zzStart+m-1));
     

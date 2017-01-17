@@ -3,6 +3,14 @@ function ExecuteScript(InputImage_Name, wmLen, patternLen, blockSize, alpha, lam
 % Execute ISS embed and extract process
 
 %% Set path of images
+
+    Output_Dir = 'Output/';
+
+    if exist(Output_Dir, 'dir') ~= 7
+        mkdir(Output_Dir);
+    end
+
+
     InputImage_Dir = '';
     InputImage_Path = [InputImage_Dir InputImage_Name];
     
@@ -10,12 +18,12 @@ function ExecuteScript(InputImage_Name, wmLen, patternLen, blockSize, alpha, lam
     filetype = tmp(end); filetype = filetype{1};
     filename = InputImage_Name(1:(length(InputImage_Name) - length(filetype) - 1));
 	
-	WMImage_Dir = '';
+    
+	WMImage_Dir = Output_Dir;
     WMImage_Name = [filename '_watermarked.' filetype];
     WMImage_Path = [WMImage_Dir WMImage_Name];
 	
-	AttackedImage_Dir = '';
-    AttackedImage_Name = [filename '_attacked.' filetype];
+	AttackedImage_Dir = Output_Dir;
 	
 
 %% ISSembed process	
@@ -28,13 +36,13 @@ function ExecuteScript(InputImage_Name, wmLen, patternLen, blockSize, alpha, lam
     
 	
 	% Prepoorcessing - generate watermark (n*1 +-1 vector)
-    % m: watermark length, b: watermark
+    % n: watermark length, b: watermark
     n = wmLen;
     b = sign(randn(n, 1));
 	
 
-	% Watermark embedding settings - set alpha, lambda, blkSize, pattern
-    % n: pattern length & x length
+	% Watermark embedding settings - set alpha, lambda, blockSize, pattern
+    % m: pattern length & x length
     m = patternLen;
     u = sign(randn(m, 1));
     
