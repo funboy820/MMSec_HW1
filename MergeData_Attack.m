@@ -45,6 +45,8 @@ plot(array_alpha, array_ber(5, :), 'k');
 hold on;
 plot(array_alpha, array_ber(6, :), 'r');
 
+legend('JPEG', 'Rotation', 'Shift', 'Scale', 'Crop');
+
 
 hold off;
 
@@ -63,7 +65,8 @@ plot(array_alpha, array_ber(9, :), 'g');
 hold on;
 plot(array_alpha, array_ber(10, :), 'k');
 
-hold off;
+legend('Average Filter', 'Sharpen', 'Salt & Pepper', 'Gaussian');
+
 
 % figure
 % plot(array_alpha, array_psnr);
