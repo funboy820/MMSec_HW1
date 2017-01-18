@@ -1,4 +1,4 @@
-function ExecuteScript(InputImage_Name, wmLen, patternLen, blockSize, alpha, lambda)
+function ImprovedSpreadSpectrum(InputImage_Name, wmLen, patternLen, blockSize, alpha, lambda, specialMethod)
 
 % Execute ISS embed and extract process
 
@@ -35,22 +35,83 @@ function ExecuteScript(InputImage_Name, wmLen, patternLen, blockSize, alpha, lam
     height = size(orgImg, 1);
     width = size(orgImg, 2);
     
+    if specialMethod == 1
+        % Error Correction Code Mode
+        
+        ECC_dataLen = 1;
+        ECC_parityLen = 2;
+        ECC_totalLen = ECC_dataLen + ECC_parityLen;
+        
+        numECCSet = ceil(wmLen / ECC_totalLen);
+        wmLen = numECCSet * ECC_totalLen;
+    end
 	
 	% Prepoorcessing - generate watermark (n*1 +-1 vector)
     % n: watermark length, b: watermark
     maxWatermarkLength = floor(height/blockSize) * floor(width/blockSize);
     if wmLen > maxWatermarkLength
         n = maxWatermarkLength;
+        fprintf('Can not embed this much length of watermark whtis this block size and this image.\n');
+        fprintf('Reduce the watermark length to the maximum number under current setting\n\n');
     else
         n = wmLen;
     end
     b = sign(randn(n, 1));
-	
+    save('watermark.mat', 'b');
+    load('watermark.mat');
+    
+    
+    if specialMethod == 1
+        % Error Correction Code Mode
+        n = floor(n/ECC_totalLen)*ECC_totalLen;
+        numECCSet = n / ECC_totalLen;
+        
+        b = b(1:n);
+        
+        % Set parity bits
+        
+        %   Turn -1 to 0
+        for i=1:n
+            if b(i) == -1
+                b(i) = 0;
+            end
+        end
+        
+        %   Start setting
+        for i=1:numECCSet
+            sHead = (i-1)*ECC_totalLen+1;
+            sTail = i*ECC_totalLen;
+            
+            segment = b(sHead:sTail);
+ 
+%             parityPos = [1 2 4 8];
+            parityPos = [1 2];
+            for j=1:length(parityPos)
+                segment(parityPos(j)) = 0;
+                segment(parityPos(j)) = ECC_GetEvenParity(segment, parityPos(j));
+            end
+            
+            b(sHead:sTail) = segment;
+        end
+        
+        
+        %   Turn 0 to -1
+        for i=1:n
+            if b(i) == 0
+                b(i) = -1;
+            end
+        end
+        
+%         save('watermark2.mat', 'b');
+    end
+
 
 	% Watermark embedding settings - set alpha, lambda, blockSize, pattern
     % m: pattern length & x length
     m = patternLen;
     u = sign(randn(m, 1));
+    save('pattern.mat', 'u');
+    load('pattern.mat');
     
     % Print parameters
     fprintf('Parameters:\n');
@@ -198,6 +259,22 @@ function ExecuteScript(InputImage_Name, wmLen, patternLen, blockSize, alpha, lam
     watermark7 = ImprovedSpreadSpectrumExtract(attackedImg7, u, blockSize, n);
     watermark8 = ImprovedSpreadSpectrumExtract(attackedImg8, u, blockSize, n);
     watermark9 = ImprovedSpreadSpectrumExtract(attackedImg9, u, blockSize, n);
+    
+    
+    if specialMethod == 1
+        % Error Correction Code Mode
+        % Do error correction
+        watermark0 = ECC_Correct(watermark0);
+        watermark1 = ECC_Correct(watermark1);
+        watermark2 = ECC_Correct(watermark2);
+        watermark3 = ECC_Correct(watermark3);
+        watermark4 = ECC_Correct(watermark4);
+        watermark5 = ECC_Correct(watermark5);
+        watermark6 = ECC_Correct(watermark6);
+        watermark7 = ECC_Correct(watermark7);
+        watermark8 = ECC_Correct(watermark8);
+        watermark9 = ECC_Correct(watermark9);
+    end
 	
 	
 %% Measurement
@@ -216,7 +293,8 @@ function ExecuteScript(InputImage_Name, wmLen, patternLen, blockSize, alpha, lam
 	% Measuring robustness
 	numDiff = sum((b == watermark0) == 0);
 	BER = numDiff / n;
-    fprintf('\tRobustness : BER = %.2f\n', BER);
+    fprintf('\tRobustness : BER = %f (%d / %d)\n', BER, numDiff, n);
+    %find((b==watermark0)==0);
     
     fprintf('\nBER of Attacks:\n');
     fprintf('\t1. %-30s: %f\n', Attacked_Type1, (sum((b == watermark1) == 0)) / n);
